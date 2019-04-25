@@ -1,81 +1,87 @@
 {
-	"name": "xlsx",
-	"version": "0.14.2",
-	"author": "sheetjs",
-	"description": "SheetJS Spreadsheet data parser and writer",
-	"keywords": [
-		"excel",
-		"xls",
-		"xlsx",
-		"xlsb",
-		"xlsm",
-		"ods",
-		"csv",
-		"dbf",
-		"dif",
-		"sylk",
-		"office",
-		"spreadsheet"
-	],
-	"bin": {
-		"xlsx": "./bin/xlsx.njs"
-	},
-	"main": "./xlsx",
-	"types": "types",
-	"browser": {
-		"buffer": false,
-		"crypto": false,
-		"stream": false,
-		"process": false,
-		"fs": false
-	},
-	"dependencies": {
-		"adler-32": "~1.2.0",
-		"cfb": "^1.1.0",
-		"codepage": "~1.14.0",
-		"commander": "~2.17.1",
-		"crc-32": "~1.2.0",
-		"exit-on-epipe": "~1.0.1",
-		"ssf": "~0.10.2"
-	},
-	"devDependencies": {
-		"@sheetjs/uglify-js": "~2.7.3",
-		"@types/node": "^8.5.9",
-		"blanket": "~1.2.3",
-		"dtslint": "^0.1.2",
-		"jsdom": "~11.1.0",
-		"mocha": "~2.5.3",
-		"typescript": "2.2.0"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/SheetJS/js-xlsx.git"
-	},
-	"scripts": {
-		"pretest": "git submodule init && git submodule update",
-		"test": "make travis",
-		"build": "make",
-		"lint": "make fullint",
-		"dtslint": "dtslint types"
-	},
-	"config": {
-		"blanket": {
-			"pattern": "xlsx.js"
-		}
-	},
-	"alex": {
-		"allow": [
-			"crash",
-			"wtf",
-			"holes"
-		]
-	},
-	"homepage": "http://sheetjs.com/opensource",
-	"bugs": {
-		"url": "https://github.com/SheetJS/js-xlsx/issues"
-	},
-	"license": "Apache-2.0",
-	"engines": {
-		"node": ">=0.8"
-	}
+  "_from": "js-xlsx",
+  "_id": "js-xlsx@0.8.22",
+  "_inBundle": false,
+  "_integrity": "sha512-3N4a9RBHTr777rxxlvwJVpC+er/neRC+40sm2M/g3RIpWiCJG0iyaGJa8Za1K3NvjhZcKn9Sz5n36TY9ti5RMQ==",
+  "_location": "/js-xlsx",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "js-xlsx",
+    "name": "js-xlsx",
+    "escapedName": "js-xlsx",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/js-xlsx/-/js-xlsx-0.8.22.tgz",
+  "_shasum": "eb503f55f9325836eedbaa8be49da0fb0f6df3c0",
+  "_spec": "js-xlsx",
+  "_where": "/Users/abc/Desktop/develop/film_review",
+  "author": {
+    "name": "sheetjs"
+  },
+  "bin": {
+    "xlsx": "./bin/xlsx.njs"
+  },
+  "bugs": {
+    "url": "https://github.com/protobi/js-xlsx/issues"
+  },
+  "bundleDependencies": false,
+  "config": {
+    "blanket": {
+      "pattern": "xlsx.js"
+    }
+  },
+  "dependencies": {
+    "adler-32": "",
+    "cfb": ">=0.10.0",
+    "codepage": "~1.3.6",
+    "commander": "",
+    "crc-32": "",
+    "jszip": "2.4.0",
+    "ssf": "~0.8.1"
+  },
+  "deprecated": false,
+  "description": "Excel (XLSB/XLSX/XLSM/XLS/XML) and ODS spreadsheet parser and writer (extended to enable read/write of cell formats with xlsx files)",
+  "devDependencies": {
+    "cheerio": "^0.19.0",
+    "mocha": "",
+    "uglify-js": "",
+    "xlsjs": ""
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "engines": {
+    "node": ">=0.8"
+  },
+  "homepage": "https://github.com/protobi/js-xlsx/tree/beta#readme",
+  "keywords": [
+    "excel",
+    "xls",
+    "xlsx",
+    "xlsb",
+    "xlsm",
+    "ods",
+    "office",
+    "spreadsheet"
+  ],
+  "license": "Apache-2.0",
+  "main": "./xlsx",
+  "name": "js-xlsx",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/protobi/js-xlsx.git#beta"
+  },
+  "scripts": {
+    "pretest": "git submodule init && git submodule update",
+    "test": "make test"
+  },
+  "version": "0.8.22"
 }
