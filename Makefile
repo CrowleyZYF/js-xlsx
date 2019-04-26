@@ -3,7 +3,7 @@ LIB=xlsx
 FMT=xlsx xlsm xlsb ods xls xml misc full
 REQS=jszip.js
 ADDONS=dist/cpexcel.js
-AUXTARGETS=
+AUXTARGETS=ods.js
 CMDS=bin/xlsx.njs
 HTMLLINT=index.html
 
@@ -12,10 +12,9 @@ DEPS=$(sort $(wildcard bits/*.js))
 TARGET=$(LIB).js
 FLOWTARGET=$(LIB).flow.js
 FLOWAUX=$(patsubst %.js,%.flow.js,$(AUXTARGETS))
-AUXSCPTS=xlsxworker.js
+AUXSCPTS=xlsxworker1.js xlsxworker2.js xlsxworker.js
 FLOWTGTS=$(TARGET) $(AUXTARGETS) $(AUXSCPTS)
-UGLIFYOPTS=--support-ie8 -m
-CLOSURE=/usr/local/lib/node_modules/google-closure-compiler/compiler.jar
+UGLIFYOPTS=--support-ie8
 
 ## Main Targets
 
@@ -50,96 +49,48 @@ init: ## Initial setup for development
 	git submodule foreach make
 	mkdir -p tmp
 
-DISTHDR=misc/suppress_export.js
 .PHONY: dist
 dist: dist-deps $(TARGET) bower.json ## Prepare JS files for distribution
-	mkdir -p dist
-	<$(TARGET) sed "s/require('stream')/{}/g;s/require('....*')/undefined/g" > dist/$(TARGET)
+	cp $(TARGET) dist/
 	cp LICENSE dist/
-	uglifyjs shim.js $(UGLIFYOPTS) -o dist/shim.min.js --preamble "$$(head -n 1 bits/00_header.js)"
-	uglifyjs $(DISTHDR) dist/$(TARGET) $(UGLIFYOPTS) -o dist/$(LIB).min.js --source-map dist/$(LIB).min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	uglifyjs $(UGLIFYOPTS) $(TARGET) -o dist/$(LIB).min.js --source-map dist/$(LIB).min.map --preamble "$$(head -n 1 bits/00_header.js)"
 	misc/strip_sourcemap.sh dist/$(LIB).min.js
-	uglifyjs $(DISTHDR) $(REQS) dist/$(TARGET) $(UGLIFYOPTS) -o dist/$(LIB).core.min.js --source-map dist/$(LIB).core.min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	uglifyjs $(UGLIFYOPTS) $(REQS) $(TARGET) -o dist/$(LIB).core.min.js --source-map dist/$(LIB).core.min.map --preamble "$$(head -n 1 bits/00_header.js)"
 	misc/strip_sourcemap.sh dist/$(LIB).core.min.js
-	uglifyjs $(DISTHDR) $(REQS) $(ADDONS) dist/$(TARGET) $(AUXTARGETS) $(UGLIFYOPTS) -o dist/$(LIB).full.min.js --source-map dist/$(LIB).full.min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	uglifyjs $(UGLIFYOPTS) $(REQS) $(ADDONS) $(TARGET) $(AUXTARGETS) -o dist/$(LIB).full.min.js --source-map dist/$(LIB).full.min.map --preamble "$$(head -n 1 bits/00_header.js)"
 	misc/strip_sourcemap.sh dist/$(LIB).full.min.js
-	cat <(head -n 1 bits/00_header.js) shim.js $(DISTHDR) $(REQS) dist/$(TARGET) > dist/$(LIB).extendscript.js
+	cat <(head -n 1 bits/00_header.js) $(REQS) $(ADDONS) $(TARGET) $(AUXTARGETS) > demos/requirejs/$(LIB).full.js
 
 .PHONY: dist-deps
-dist-deps: ## Copy dependencies for distribution
-	mkdir -p dist
+dist-deps: ods.js ## Copy dependencies for distribution
 	cp node_modules/codepage/dist/cpexcel.full.js dist/cpexcel.js
 	cp jszip.js dist/jszip.js
+	cp ods.js dist/ods.js
+	uglifyjs $(UGLIFYOPTS) ods.js -o dist/ods.min.js --source-map dist/ods.min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	misc/strip_sourcemap.sh dist/ods.min.js
 
 .PHONY: aux
 aux: $(AUXTARGETS)
 
-BYTEFILE=dist/xlsx.min.js dist/xlsx.{core,full}.min.js dist/xlsx.extendscript.js
-.PHONY: bytes
-bytes: ## Display minified and gzipped file sizes
-	for i in $(BYTEFILE); do printj "%-30s %7d %10d" $$i $$(wc -c < $$i) $$(gzip --best --stdout $$i | wc -c); done
+.PHONY: ods
+ods: ods.js
 
-.PHONY: graph
-graph: formats.png legend.png ## Rebuild format conversion graph
-formats.png: formats.dot
-	circo -Tpng -o$@ $<
-legend.png: misc/legend.dot
-	dot -Tpng -o$@ $<
+ODSDEPS=$(sort $(wildcard odsbits/*.js))
+ods.flow.js: $(ODSDEPS) ## Build ODS support library
+	cat $^ | tr -d '\15\32' > $@
 
-
-.PHONY: nexe
-nexe: xlsx.exe ## Build nexe standalone executable
-
-xlsx.exe: bin/xlsx.njs xlsx.js
-	tail -n+2 $< | sed 's#\.\./#./xlsx#g' > nexe.js
-	nexe -i nexe.js -o $@
-	rm nexe.js
-
-.PHONY: pkg
-pkg: bin/xlsx.njs xlsx.js ## Build pkg standalone executable
-	pkg $<
 
 ## Testing
 
 .PHONY: test mocha
 test mocha: test.js ## Run test suite
-	mocha -R spec -t 30000
+	mocha -R spec -t 20000
 
 #*                      To run tests for one format, make test_<fmt>
-#*                      To run the core test suite, make test_misc
 TESTFMT=$(patsubst %,test_%,$(FMT))
 .PHONY: $(TESTFMT)
 $(TESTFMT): test_%:
 	FMTS=$* make test
-
-.PHONY: travis
-travis: ## Run test suite with minimal output
-	mocha -R dot -t 30000
-
-.PHONY: ctest
-ctest: ## Build browser test fixtures
-	node tests/make_fixtures.js
-
-.PHONY: ctestserv
-ctestserv: ## Start a test server on port 8000
-	@cd tests && python -mSimpleHTTPServer
-
-## Demos
-
-DEMOS=angular angular-new browserify requirejs rollup systemjs webpack
-DEMOTGTS=$(patsubst %,demo-%,$(DEMOS))
-.PHONY: demos
-demos: $(DEMOTGTS)
-
-.PHONY: demo-angular
-demo-angular: ## Run angular demo build
-	#make -C demos/angular
-	@echo "start a local server and go to demos/angular/angular.html"
-
-.PHONY: demo-angular-new
-demo-angular-new: ## Run angular 2 demo build
-	make -C demos/angular2
-	@echo "go to demos/angular/angular.html and run 'ng serve'"
 
 .PHONY: demo-browserify
 demo-browserify: ## Run browserify demo build
@@ -151,48 +102,19 @@ demo-webpack: ## Run webpack demo build
 	make -C demos/webpack
 	@echo "start a local server and go to demos/webpack/webpack.html"
 
-.PHONY: demo-requirejs
-demo-requirejs: ## Run requirejs demo build
-	make -C demos/requirejs
-	@echo "start a local server and go to demos/requirejs/requirejs.html"
-
-.PHONY: demo-rollup
-demo-rollup: ## Run rollup demo build
-	make -C demos/rollup
-	@echo "start a local server and go to demos/rollup/rollup.html"
-
-.PHONY: demo-systemjs
-demo-systemjs: ## Run systemjs demo build
-	make -C demos/systemjs
-
 ## Code Checking
 
-.PHONY: fullint
-fullint: lint old-lint tslint flow mdlint ## Run all checks
-
 .PHONY: lint
-lint: $(TARGET) $(AUXTARGETS) ## Run eslint checks
-	@eslint --ext .js,.njs,.json,.html,.htm $(TARGET) $(AUXTARGETS) $(CMDS) $(HTMLLINT) package.json bower.json
-	if [ -e $(CLOSURE) ]; then java -jar $(CLOSURE) $(REQS) $(FLOWTARGET) --jscomp_warning=reportUnknownTypes >/dev/null; fi
-
-.PHONY: old-lint
-old-lint: $(TARGET) $(AUXTARGETS) ## Run jshint and jscs checks
+lint: $(TARGET) $(AUXTARGETS) ## Run jshint and jscs checks
 	@jshint --show-non-errors $(TARGET) $(AUXTARGETS)
 	@jshint --show-non-errors $(CMDS)
-	@jshint --show-non-errors package.json bower.json test.js
+	@jshint --show-non-errors package.json bower.json
 	@jshint --show-non-errors --extract=always $(HTMLLINT)
-	@jscs $(TARGET) $(AUXTARGETS) test.js
-	if [ -e $(CLOSURE) ]; then java -jar $(CLOSURE) $(REQS) $(FLOWTARGET) --jscomp_warning=reportUnknownTypes >/dev/null; fi
-
-.PHONY: tslint
-tslint: $(TARGET) ## Run typescript checks
-	#@npm install dtslint typescript
-	#@npm run-script dtslint
-	dtslint types
+	@jscs $(TARGET) $(AUXTARGETS)
 
 .PHONY: flow
 flow: lint ## Run flow checker
-	@flow check --all --show-all-errors --include-warnings
+	@flow check --all --show-all-errors
 
 .PHONY: cov
 cov: misc/coverage.html ## Run coverage test
@@ -204,32 +126,12 @@ $(COVFMT): cov_%:
 	FMTS=$* make cov
 
 misc/coverage.html: $(TARGET) test.js
-	mocha --require blanket -R html-cov -t 30000 > $@
+	mocha --require blanket -R html-cov -t 20000 > $@
 
 .PHONY: coveralls
 coveralls: ## Coverage Test + Send to coveralls.io
-	mocha --require blanket --reporter mocha-lcov-reporter -t 30000 | node ./node_modules/coveralls/bin/coveralls.js
+	mocha --require blanket --reporter mocha-lcov-reporter -t 20000 | node ./node_modules/coveralls/bin/coveralls.js
 
-READEPS=$(sort $(wildcard docbits/*.md))
-README.md: $(READEPS)
-	awk 'FNR==1{p=0}/#/{p=1}p' $^ | tr -d '\15\32' > $@
-
-.PHONY: readme
-readme: README.md ## Update README Table of Contents
-	markdown-toc -i README.md
-
-.PHONY: book
-book: readme graph ## Update summary for documentation
-	printf "# Summary\n\n- [xlsx](README.md#sheetjs-js-xlsx)\n" > misc/docs/SUMMARY.md
-	markdown-toc README.md | sed 's/(#/(README.md#/g'>> misc/docs/SUMMARY.md
-	<README.md grep -vE "(details|summary)>" > misc/docs/README.md
-
-DEMOMDS=$(sort $(wildcard demos/*/README.md))
-MDLINT=$(DEMOMDS) $(READEPS) demos/README.md
-.PHONY: mdlint
-mdlint: $(MDLINT) ## Check markdown documents
-	alex $^
-	mdspell -a -n -x -r --en-us $^
 
 .PHONY: help
 help:

@@ -15,14 +15,14 @@ function parse_cust_props(data/*:string*/, opts) {
 			case '</property>': name = null; break;
 			default: if (x.indexOf('<vt:') === 0) {
 				var toks = x.split('>');
-				var type = toks[0].slice(4), text = toks[1];
+				var type = toks[0].substring(4), text = toks[1];
 				/* 22.4.2.32 (CT_Variant). Omit the binary types from 22.4 (Variant Types) */
 				switch(type) {
-					case 'lpstr': case 'bstr': case 'lpwstr':
+					case 'lpstr': case 'lpwstr': case 'bstr': case 'lpwstr':
 						p[name] = unescapexml(text);
 						break;
 					case 'bool':
-						p[name] = parsexmlbool(text);
+						p[name] = parsexmlbool(text, '<vt:bool>');
 						break;
 					case 'i1': case 'i2': case 'i4': case 'i8': case 'int': case 'uint':
 						p[name] = parseInt(text, 10);
@@ -31,16 +31,15 @@ function parse_cust_props(data/*:string*/, opts) {
 						p[name] = parseFloat(text);
 						break;
 					case 'filetime': case 'date':
-						p[name] = parseDate(text);
+						p[name] = new Date(text);
 						break;
 					case 'cy': case 'error':
 						p[name] = unescapexml(text);
 						break;
 					default:
-						if(type.slice(-1) == '/') break;
 						if(opts.WTF && typeof console !== 'undefined') console.warn('Unexpected', x, type, toks);
 				}
-			} else if(x.slice(0,2) === "</") {/* empty */
+			} else if(x.substr(0,2) === "</") {
 			} else if(opts.WTF) throw new Error(x);
 		}
 	}
@@ -52,7 +51,7 @@ var CUST_PROPS_XML_ROOT = writextag('Properties', null, {
 	'xmlns:vt': XMLNS.vt
 });
 
-function write_cust_props(cp/*::, opts*/)/*:string*/ {
+function write_cust_props(cp, opts)/*:string*/ {
 	var o = [XML_HEADER, CUST_PROPS_XML_ROOT];
 	if(!cp) return o.join("");
 	var pid = 1;

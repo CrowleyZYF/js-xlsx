@@ -1,3 +1,10 @@
+/* [MS-XLS] 2.5.198.44 */
+var PtgDataType = {
+	/*::[*/0x1/*::]*/: "REFERENCE", // reference to range
+	/*::[*/0x2/*::]*/: "VALUE", // single value
+	/*::[*/0x3/*::]*/: "ARRAY" // array of values
+};
+
 /* [MS-XLS] 2.5.198.4 */
 var Cetab = {
 	/*::[*/0x0000/*::]*/: 'BEEP',
@@ -863,8 +870,7 @@ var Ftab = {
 	/*::[*/0x01D1/*::]*/: 'WEEKNUM',
 	/*::[*/0x01D2/*::]*/: 'AMORDEGRC',
 	/*::[*/0x01D3/*::]*/: 'AMORLINC',
-	/*::[*/0x01D4/*::]*/: 'CONVERT',
-	/*::[*/0x02D4/*::]*/: 'SHEETJS',
+	/*::[*/0x01D4/*::]*/: 'SHEETJS',
 	/*::[*/0x01D5/*::]*/: 'ACCRINT',
 	/*::[*/0x01D6/*::]*/: 'ACCRINTM',
 	/*::[*/0x01D7/*::]*/: 'WORKDAY',
@@ -885,7 +891,6 @@ var Ftab = {
 var FtabArgc = {
 	/*::[*/0x0002/*::]*/: 1, /* ISNA */
 	/*::[*/0x0003/*::]*/: 1, /* ISERROR */
-	/*::[*/0x000A/*::]*/: 0, /* NA */
 	/*::[*/0x000F/*::]*/: 1, /* SIN */
 	/*::[*/0x0010/*::]*/: 1, /* COS */
 	/*::[*/0x0011/*::]*/: 1, /* TAN */
@@ -903,8 +908,6 @@ var FtabArgc = {
 	/*::[*/0x001F/*::]*/: 3, /* MID */
 	/*::[*/0x0020/*::]*/: 1, /* LEN */
 	/*::[*/0x0021/*::]*/: 1, /* VALUE */
-	/*::[*/0x0022/*::]*/: 0, /* TRUE */
-	/*::[*/0x0023/*::]*/: 0, /* FALSE */
 	/*::[*/0x0026/*::]*/: 1, /* NOT */
 	/*::[*/0x0027/*::]*/: 2, /* MOD */
 	/*::[*/0x0028/*::]*/: 3, /* DCOUNT */
@@ -917,7 +920,6 @@ var FtabArgc = {
 	/*::[*/0x0030/*::]*/: 2, /* TEXT */
 	/*::[*/0x0035/*::]*/: 1, /* GOTO */
 	/*::[*/0x003D/*::]*/: 3, /* MIRR */
-	/*::[*/0x003F/*::]*/: 0, /* RAND */
 	/*::[*/0x0041/*::]*/: 3, /* DATE */
 	/*::[*/0x0042/*::]*/: 3, /* TIME */
 	/*::[*/0x0043/*::]*/: 1, /* DAY */
@@ -927,7 +929,6 @@ var FtabArgc = {
 	/*::[*/0x0047/*::]*/: 1, /* HOUR */
 	/*::[*/0x0048/*::]*/: 1, /* MINUTE */
 	/*::[*/0x0049/*::]*/: 1, /* SECOND */
-	/*::[*/0x004A/*::]*/: 0, /* NOW */
 	/*::[*/0x004B/*::]*/: 1, /* AREAS */
 	/*::[*/0x004C/*::]*/: 1, /* ROWS */
 	/*::[*/0x004D/*::]*/: 1, /* COLUMNS */
@@ -936,18 +937,13 @@ var FtabArgc = {
 	/*::[*/0x0053/*::]*/: 1, /* TRANSPOSE */
 	/*::[*/0x0055/*::]*/: 0, /* STEP */
 	/*::[*/0x0056/*::]*/: 1, /* TYPE */
-	/*::[*/0x0059/*::]*/: 0, /* CALLER */
 	/*::[*/0x005A/*::]*/: 1, /* DEREF */
-	/*::[*/0x005E/*::]*/: 0, /* ACTIVE.CELL */
-	/*::[*/0x005F/*::]*/: 0, /* SELECTION */
 	/*::[*/0x0061/*::]*/: 2, /* ATAN2 */
 	/*::[*/0x0062/*::]*/: 1, /* ASIN */
 	/*::[*/0x0063/*::]*/: 1, /* ACOS */
 	/*::[*/0x0065/*::]*/: 3, /* HLOOKUP */
 	/*::[*/0x0066/*::]*/: 3, /* VLOOKUP */
 	/*::[*/0x0069/*::]*/: 1, /* ISREF */
-	/*::[*/0x006A/*::]*/: 1, /* GET.FORMULA */
-	/*::[*/0x006C/*::]*/: 2, /* SET.VALUE */
 	/*::[*/0x006F/*::]*/: 1, /* CHAR */
 	/*::[*/0x0070/*::]*/: 1, /* LOWER */
 	/*::[*/0x0071/*::]*/: 1, /* UPPER */
@@ -973,7 +969,6 @@ var FtabArgc = {
 	/*::[*/0x008E/*::]*/: 3, /* SLN */
 	/*::[*/0x008F/*::]*/: 4, /* SYD */
 	/*::[*/0x0090/*::]*/: 4, /* DDB */
-	/*::[*/0x00A1/*::]*/: 1, /* DIALOG.BOX */
 	/*::[*/0x00A2/*::]*/: 1, /* CLEAN */
 	/*::[*/0x00A3/*::]*/: 1, /* MDETERM */
 	/*::[*/0x00A4/*::]*/: 1, /* MINVERSE */
@@ -985,7 +980,6 @@ var FtabArgc = {
 	/*::[*/0x00B2/*::]*/: 2, /* EXECUTE */
 	/*::[*/0x00B3/*::]*/: 1, /* TERMINATE */
 	/*::[*/0x00B8/*::]*/: 1, /* FACT */
-	/*::[*/0x00BA/*::]*/: 1, /* GET.WORKSPACE */
 	/*::[*/0x00BD/*::]*/: 3, /* DPRODUCT */
 	/*::[*/0x00BE/*::]*/: 1, /* ISNONTEXT */
 	/*::[*/0x00C3/*::]*/: 3, /* DSTDEVP */
@@ -1001,7 +995,6 @@ var FtabArgc = {
 	/*::[*/0x00D5/*::]*/: 2, /* ROUNDDOWN */
 	/*::[*/0x00D6/*::]*/: 1, /* ASC */
 	/*::[*/0x00D7/*::]*/: 1, /* DBCS */
-	/*::[*/0x00E1/*::]*/: 0, /* END.IF */
 	/*::[*/0x00E5/*::]*/: 1, /* SINH */
 	/*::[*/0x00E6/*::]*/: 1, /* COSH */
 	/*::[*/0x00E7/*::]*/: 1, /* TANH */
@@ -1086,54 +1079,9 @@ var FtabArgc = {
 	/*::[*/0x0178/*::]*/: 1, /* ROUNDBAHTDOWN */
 	/*::[*/0x0179/*::]*/: 1, /* ROUNDBAHTUP */
 	/*::[*/0x017A/*::]*/: 1, /* THAIYEAR */
-	/*::[*/0x017E/*::]*/: 3, /* CUBEMEMBERPROPERTY */
-	/*::[*/0x0181/*::]*/: 1, /* HEX2DEC */
-	/*::[*/0x0188/*::]*/: 1, /* OCT2DEC */
-	/*::[*/0x0189/*::]*/: 1, /* BIN2DEC */
-	/*::[*/0x018C/*::]*/: 2, /* IMSUB */
-	/*::[*/0x018D/*::]*/: 2, /* IMDIV */
-	/*::[*/0x018E/*::]*/: 2, /* IMPOWER */
-	/*::[*/0x018F/*::]*/: 1, /* IMABS */
-	/*::[*/0x0190/*::]*/: 1, /* IMSQRT */
-	/*::[*/0x0191/*::]*/: 1, /* IMLN */
-	/*::[*/0x0192/*::]*/: 1, /* IMLOG2 */
-	/*::[*/0x0193/*::]*/: 1, /* IMLOG10 */
-	/*::[*/0x0194/*::]*/: 1, /* IMSIN */
-	/*::[*/0x0195/*::]*/: 1, /* IMCOS */
-	/*::[*/0x0196/*::]*/: 1, /* IMEXP */
-	/*::[*/0x0197/*::]*/: 1, /* IMARGUMENT */
-	/*::[*/0x0198/*::]*/: 1, /* IMCONJUGATE */
-	/*::[*/0x0199/*::]*/: 1, /* IMAGINARY */
-	/*::[*/0x019A/*::]*/: 1, /* IMREAL */
-	/*::[*/0x019E/*::]*/: 4, /* SERIESSUM */
-	/*::[*/0x019F/*::]*/: 1, /* FACTDOUBLE */
 	/*::[*/0x01A0/*::]*/: 1, /* SQRTPI */
-	/*::[*/0x01A1/*::]*/: 2, /* QUOTIENT */
-	/*::[*/0x01A4/*::]*/: 1, /* ISEVEN */
-	/*::[*/0x01A5/*::]*/: 1, /* ISODD */
-	/*::[*/0x01A6/*::]*/: 2, /* MROUND */
-	/*::[*/0x01A8/*::]*/: 1, /* ERFC */
-	/*::[*/0x01A9/*::]*/: 2, /* BESSELJ */
-	/*::[*/0x01AA/*::]*/: 2, /* BESSELK */
-	/*::[*/0x01AB/*::]*/: 2, /* BESSELY */
-	/*::[*/0x01AC/*::]*/: 2, /* BESSELI */
-	/*::[*/0x01AE/*::]*/: 3, /* XNPV */
-	/*::[*/0x01B6/*::]*/: 3, /* TBILLEQ */
-	/*::[*/0x01B7/*::]*/: 3, /* TBILLPRICE */
-	/*::[*/0x01B8/*::]*/: 3, /* TBILLYIELD */
-	/*::[*/0x01BB/*::]*/: 2, /* DOLLARDE */
-	/*::[*/0x01BC/*::]*/: 2, /* DOLLARFR */
-	/*::[*/0x01BD/*::]*/: 2, /* NOMINAL */
-	/*::[*/0x01BE/*::]*/: 2, /* EFFECT */
-	/*::[*/0x01BF/*::]*/: 6, /* CUMPRINC */
-	/*::[*/0x01C0/*::]*/: 6, /* CUMIPMT */
 	/*::[*/0x01C1/*::]*/: 2, /* EDATE */
 	/*::[*/0x01C2/*::]*/: 2, /* EOMONTH */
-	/*::[*/0x01D0/*::]*/: 2, /* RANDBETWEEN */
-	/*::[*/0x01D4/*::]*/: 3, /* CONVERT */
-	/*::[*/0x01DC/*::]*/: 2, /* FVSCHEDULE */
-	/*::[*/0x01DF/*::]*/: 1, /* CUBESETCOUNT */
-	/*::[*/0x01E0/*::]*/: 2, /* IFERROR */
 	/*::[*/0xFFFF/*::]*/: 0
 };
 /* [MS-XLSX] 2.2.3 Functions */
@@ -1164,7 +1112,6 @@ var XLSXFutureFunctions = {
 	"_xlfn.CHISQ.INV.RT": "CHISQ.INV.RT",
 	"_xlfn.CHISQ.TEST": "CHISQ.TEST",
 	"_xlfn.COMBINA": "COMBINA",
-	"_xlfn.CONCAT": "CONCAT",
 	"_xlfn.CONFIDENCE.NORM": "CONFIDENCE.NORM",
 	"_xlfn.CONFIDENCE.T": "CONFIDENCE.T",
 	"_xlfn.COT": "COT",
@@ -1188,11 +1135,6 @@ var XLSXFutureFunctions = {
 	"_xlfn.FILTERXML": "FILTERXML",
 	"_xlfn.FLOOR.MATH": "FLOOR.MATH",
 	"_xlfn.FLOOR.PRECISE": "FLOOR.PRECISE",
-	"_xlfn.FORECAST.ETS": "FORECAST.ETS",
-	"_xlfn.FORECAST.ETS.CONFINT": "FORECAST.ETS.CONFINT",
-	"_xlfn.FORECAST.ETS.SEASONALITY": "FORECAST.ETS.SEASONALITY",
-	"_xlfn.FORECAST.ETS.STAT": "FORECAST.ETS.STAT",
-	"_xlfn.FORECAST.LINEAR": "FORECAST.LINEAR",
 	"_xlfn.FORMULATEXT": "FORMULATEXT",
 	"_xlfn.GAMMA": "GAMMA",
 	"_xlfn.GAMMA.DIST": "GAMMA.DIST",
@@ -1200,9 +1142,8 @@ var XLSXFutureFunctions = {
 	"_xlfn.GAMMALN.PRECISE": "GAMMALN.PRECISE",
 	"_xlfn.GAUSS": "GAUSS",
 	"_xlfn.HYPGEOM.DIST": "HYPGEOM.DIST",
-	"_xlfn.IFERROR": "IFERROR",
 	"_xlfn.IFNA": "IFNA",
-	"_xlfn.IFS": "IFS",
+	"_xlfn.IFERROR": "IFERROR",
 	"_xlfn.IMCOSH": "IMCOSH",
 	"_xlfn.IMCOT": "IMCOT",
 	"_xlfn.IMCSC": "IMCSC",
@@ -1216,8 +1157,6 @@ var XLSXFutureFunctions = {
 	"_xlfn.ISOWEEKNUM": "ISOWEEKNUM",
 	"_xlfn.LOGNORM.DIST": "LOGNORM.DIST",
 	"_xlfn.LOGNORM.INV": "LOGNORM.INV",
-	"_xlfn.MAXIFS": "MAXIFS",
-	"_xlfn.MINIFS": "MINIFS",
 	"_xlfn.MODE.MULT": "MODE.MULT",
 	"_xlfn.MODE.SNGL": "MODE.SNGL",
 	"_xlfn.MUNIT": "MUNIT",
@@ -1251,14 +1190,12 @@ var XLSXFutureFunctions = {
 	"_xlfn.STDEV.P": "STDEV.P",
 	"_xlfn.STDEV.S": "STDEV.S",
 	"_xlfn.SUMIFS": "SUMIFS",
-	"_xlfn.SWITCH": "SWITCH",
 	"_xlfn.T.DIST": "T.DIST",
 	"_xlfn.T.DIST.2T": "T.DIST.2T",
 	"_xlfn.T.DIST.RT": "T.DIST.RT",
 	"_xlfn.T.INV": "T.INV",
 	"_xlfn.T.INV.2T": "T.INV.2T",
 	"_xlfn.T.TEST": "T.TEST",
-	"_xlfn.TEXTJOIN": "TEXTJOIN",
 	"_xlfn.UNICHAR": "UNICHAR",
 	"_xlfn.UNICODE": "UNICODE",
 	"_xlfn.VAR.P": "VAR.P",

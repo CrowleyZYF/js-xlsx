@@ -1,26 +1,19 @@
-/* xlsx.js (C) 2013-present  SheetJS -- http://sheetjs.com */
 module.exports = {
-	/* ensure that the XLSX variable is exported */
 	output: {
 		libraryTarget: 'var',
 		library: 'XLSX'
 	},
-	/* module.noParse needed for bower */
 	module: {
-		noParse: [
-			/xlsx.core.min.js/,
-			/xlsx.full.min.js/
-		]
+		noParse: [/jszip.js$/]
 	},
-	/* Uncomment the next block to suppress codepage */
-	/*
-	resolve: {
-		alias: { "./dist/cpexcel.js": "" }
-	},
-	*/
-	/* suppress node shims */
 	node: {
-		process: false,
+		fs: false,
 		Buffer: false
-	}
+	},
+	externals: [
+		{
+			'./cptable': 'var cptable',
+			'../xlsx.js': 'var _XLSX'
+		}
+	]
 }

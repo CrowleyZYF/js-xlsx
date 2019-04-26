@@ -13,7 +13,7 @@ function getdatabin(data) {
 	if(data.asNodeBuffer && has_buf) return data.asNodeBuffer();
 	if(data._data && data._data.getContent) {
 		var o = data._data.getContent();
-		if(typeof o == "string") return char_codes(o);
+		if(typeof o == "string") return str2cc(o);
 		return Array.prototype.slice.call(o);
 	}
 	return null;
@@ -22,7 +22,6 @@ function getdatabin(data) {
 function getdata(data) { return (data && data.name.slice(-4) === ".bin") ? getdatabin(data) : getdatastr(data); }
 
 /* Part 2 Section 10.1.2 "Mapping Content Types" Names are case-insensitive */
-/* OASIS does not comment on filename case sensitivity */
 function safegetzipfile(zip, file/*:string*/) {
 	var k = keys(zip.files);
 	var f = file.toLowerCase(), g = f.replace(/\//g,'\\');
@@ -39,7 +38,7 @@ function getzipfile(zip, file/*:string*/) {
 	return o;
 }
 
-function getzipdata(zip, file/*:string*/, safe/*:?boolean*/)/*:any*/ {
+function getzipdata(zip, file/*:string*/, safe/*:?boolean*/) {
 	if(!safe) return getdata(getzipfile(zip, file));
 	if(!file) return null;
 	try { return getzipdata(zip, file); } catch(e) { return null; }
@@ -51,30 +50,12 @@ function getzipstr(zip, file/*:string*/, safe/*:?boolean*/)/*:?string*/ {
 	try { return getzipstr(zip, file); } catch(e) { return null; }
 }
 
-function zipentries(zip) {
-	var k = keys(zip.files), o = [];
-	for(var i = 0; i < k.length; ++i) if(k[i].slice(-1) != '/') o.push(k[i]);
-	return o.sort();
-}
-
-var jszip;
-/*:: declare var JSZipSync:any; */
-/*global JSZipSync:true */
-if(typeof JSZipSync !== 'undefined') jszip = JSZipSync;
-if(typeof exports !== 'undefined') {
-	if(typeof module !== 'undefined' && module.exports) {
+var _fs, jszip;
+/*:: declare var JSZip:any; */
+if(typeof JSZip !== 'undefined') jszip = JSZip;
+if (typeof exports !== 'undefined') {
+	if (typeof module !== 'undefined' && module.exports) {
 		if(typeof jszip === 'undefined') jszip = require('./jszip.js');
+		_fs = require('fs');
 	}
-}
-
-function resolve_path(path/*:string*/, base/*:string*/)/*:string*/ {
-	var result = base.split('/');
-	if(base.slice(-1) != "/") result.pop(); // folder path
-	var target = path.split('/');
-	while (target.length !== 0) {
-		var step = target.shift();
-		if (step === '..') result.pop();
-		else if (step !== '.') result.push(step);
-	}
-	return result.join('/');
 }

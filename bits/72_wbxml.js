@@ -1,12 +1,11 @@
 /* 18.2 Workbook */
 var wbnsregex = /<\w+:workbook/;
-function parse_wb_xml(data, opts)/*:WorkbookFile*/ {
+function parse_wb_xml(data, opts) {
 	if(!data) throw new Error("Could not find file");
-	var wb = { AppVersion:{}, WBProps:{}, WBView:[], Sheets:[], CalcPr:{}, Names:[], xmlns: "" };
+	var wb = { AppVersion:{}, WBProps:{}, WBView:[], Sheets:[], CalcPr:{}, xmlns: "" };
 	var pass = false, xmlns = "xmlns";
-	var dname = {}, dnstart = 0;
-	data.replace(tagregex, function xml_wb(x, idx) {
-		var y/*:any*/ = parsexmltag(x);
+	(data.match(tagregex)||[]).forEach(function xml_wb(x) {
+		var y = parsexmltag(x);
 		switch(strip_ns(y[0])) {
 			case '<?xml': break;
 
@@ -19,49 +18,28 @@ function parse_wb_xml(data, opts)/*:WorkbookFile*/ {
 
 			/* 18.2.13 fileVersion CT_FileVersion ? */
 			case '<fileVersion': delete y[0]; wb.AppVersion = y; break;
-			case '<fileVersion/>': case '</fileVersion>': break;
+			case '<fileVersion/>': break;
 
 			/* 18.2.12 fileSharing CT_FileSharing ? */
 			case '<fileSharing': case '<fileSharing/>': break;
 
 			/* 18.2.28 workbookPr CT_WorkbookPr ? */
-			case '<workbookPr':
-			case '<workbookPr/>':
-				WBPropsDef.forEach(function(w) {
-					if(y[w[0]] == null) return;
-					switch(w[2]) {
-						case "bool": wb.WBProps[w[0]] = parsexmlbool(y[w[0]]); break;
-						case "int": wb.WBProps[w[0]] = parseInt(y[w[0]], 10); break;
-						default: wb.WBProps[w[0]] = y[w[0]];
-					}
-				});
-				if(y.codeName) wb.WBProps.CodeName = y.codeName;
-				break;
-			case '</workbookPr>': break;
+			case '<workbookPr': delete y[0]; wb.WBProps = y; break;
+			case '<workbookPr/>': delete y[0]; wb.WBProps = y; break;
 
 			/* 18.2.29 workbookProtection CT_WorkbookProtection ? */
 			case '<workbookProtection': break;
 			case '<workbookProtection/>': break;
 
 			/* 18.2.1  bookViews CT_BookViews ? */
-			case '<bookViews': case '<bookViews>': case '</bookViews>': break;
+			case '<bookViews>': case '</bookViews>': break;
 			/* 18.2.30   workbookView CT_BookView + */
-			case '<workbookView': case '<workbookView/>': delete y[0]; wb.WBView.push(y); break;
-			case '</workbookView>': break;
+			case '<workbookView': delete y[0]; wb.WBView.push(y); break;
 
 			/* 18.2.20 sheets CT_Sheets 1 */
-			case '<sheets': case '<sheets>': case '</sheets>': break; // aggregate sheet
+			case '<sheets>': case '</sheets>': break; // aggregate sheet
 			/* 18.2.19   sheet CT_Sheet + */
-			case '<sheet':
-				switch(y.state) {
-					case "hidden": y.Hidden = 1; break;
-					case "veryHidden": y.Hidden = 2; break;
-					default: y.Hidden = 0;
-				}
-				delete y.state;
-				y.name = unescapexml(utf8read(y.name));
-				delete y[0]; wb.Sheets.push(y); break;
-			case '</sheet>': break;
+			case '<sheet': delete y[0]; y.name = utf8read(y.name); wb.Sheets.push(y); break;
 
 			/* 18.2.15 functionGroups CT_FunctionGroups ? */
 			case '<functionGroups': case '<functionGroups/>': break;
@@ -78,24 +56,11 @@ function parse_wb_xml(data, opts)/*:WorkbookFile*/ {
 			case '<definedNames>': case '<definedNames': pass=true; break;
 			case '</definedNames>': pass=false; break;
 			/* 18.2.5    definedName CT_DefinedName + */
-			case '<definedName': {
-				dname = {};
-				dname.Name = utf8read(y.name);
-				if(y.comment) dname.Comment = y.comment;
-				if(y.localSheetId) dname.Sheet = +y.localSheetId;
-				if(parsexmlbool(y.hidden||"0")) dname.Hidden = true;
-				dnstart = idx + x.length;
-			}	break;
-			case '</definedName>': {
-				dname.Ref = unescapexml(utf8read(data.slice(dnstart, idx)));
-				wb.Names.push(dname);
-			} break;
-			case '<definedName/>': break;
+			case '<definedName': case '<definedName/>': case '</definedName>': break;
 
 			/* 18.2.2  calcPr CT_CalcPr ? */
 			case '<calcPr': delete y[0]; wb.CalcPr = y; break;
 			case '<calcPr/>': delete y[0]; wb.CalcPr = y; break;
-			case '</calcPr>': break;
 
 			/* 18.2.16 oleSize CT_OleSize ? (ref required) */
 			case '<oleSize': break;
@@ -130,23 +95,18 @@ function parse_wb_xml(data, opts)/*:WorkbookFile*/ {
 			case '<webPublishObject': break;
 
 			/* 18.2.10 extLst CT_ExtensionList ? */
-			case '<extLst': case '<extLst>': case '</extLst>': case '<extLst/>': break;
+			case '<extLst>': case '</extLst>': case '<extLst/>': break;
 			/* 18.2.7    ext CT_Extension + */
 			case '<ext': pass=true; break; //TODO: check with versions of excel
 			case '</ext>': pass=false; break;
 
 			/* Others */
 			case '<ArchID': break;
-			case '<AlternateContent':
-			case '<AlternateContent>': pass=true; break;
+			case '<AlternateContent': pass=true; break;
 			case '</AlternateContent>': pass=false; break;
 
-			/* TODO */
-			case '<revisionPtr': break;
-
-			default: if(!pass && opts.WTF) throw new Error('unrecognized ' + y[0] + ' in workbook');
+			default: if(!pass && opts.WTF) throw 'unrecognized ' + y[0] + ' in workbook';
 		}
-		return x;
 	});
 	if(XMLNS.main.indexOf(wb.xmlns) === -1) throw new Error("Unknown Namespace: " + wb.xmlns);
 
@@ -162,75 +122,19 @@ var WB_XML_ROOT = writextag('workbook', null, {
 	'xmlns:r': XMLNS.r
 });
 
-function write_wb_xml(wb/*:Workbook*//*::, opts:?WriteOpts*/)/*:string*/ {
+function safe1904(wb/*:Workbook*/)/*:string*/ {
+	/* TODO: store date1904 somewhere else */
+	try { return parsexmlbool(wb.Workbook.WBProps.date1904) ? "true" : "false"; } catch(e) { return "false"; }
+}
+
+function write_wb_xml(wb/*:Workbook*/, opts/*:?WriteOpts*/)/*:string*/ {
 	var o = [XML_HEADER];
 	o[o.length] = WB_XML_ROOT;
-
-	var write_names = (wb.Workbook && (wb.Workbook.Names||[]).length > 0);
-
-	/* fileVersion */
-	/* fileSharing */
-
-	var workbookPr/*:any*/ = ({codeName:"ThisWorkbook"}/*:any*/);
-	if(wb.Workbook && wb.Workbook.WBProps) {
-		WBPropsDef.forEach(function(x) {
-			/*:: if(!wb.Workbook || !wb.Workbook.WBProps) throw "unreachable"; */
-			if((wb.Workbook.WBProps[x[0]]/*:any*/) == null) return;
-			if((wb.Workbook.WBProps[x[0]]/*:any*/) == x[1]) return;
-			workbookPr[x[0]] = (wb.Workbook.WBProps[x[0]]/*:any*/);
-		});
-		/*:: if(!wb.Workbook || !wb.Workbook.WBProps) throw "unreachable"; */
-		if(wb.Workbook.WBProps.CodeName) { workbookPr.codeName = wb.Workbook.WBProps.CodeName; delete workbookPr.CodeName; }
-	}
-	o[o.length] = (writextag('workbookPr', null, workbookPr));
-
-	/* workbookProtection */
-
-	var sheets = wb.Workbook && wb.Workbook.Sheets || [];
-	var i = 0;
-
-	/* bookViews */
-
+	o[o.length] = (writextag('workbookPr', null, {date1904:safe1904(wb)}));
 	o[o.length] = "<sheets>";
-	for(i = 0; i != wb.SheetNames.length; ++i) {
-		var sht = ({name:escapexml(wb.SheetNames[i].slice(0,31))}/*:any*/);
-		sht.sheetId = ""+(i+1);
-		sht["r:id"] = "rId"+(i+1);
-		if(sheets[i]) switch(sheets[i].Hidden) {
-			case 1: sht.state = "hidden"; break;
-			case 2: sht.state = "veryHidden"; break;
-		}
-		o[o.length] = (writextag('sheet',null,sht));
-	}
+	for(var i = 0; i != wb.SheetNames.length; ++i)
+		o[o.length] = (writextag('sheet',null,{name:wb.SheetNames[i].substr(0,31), sheetId:""+(i+1), "r:id":"rId"+(i+1)}));
 	o[o.length] = "</sheets>";
-
-	/* functionGroups */
-	/* externalReferences */
-
-	if(write_names) {
-		o[o.length] = "<definedNames>";
-		if(wb.Workbook && wb.Workbook.Names) wb.Workbook.Names.forEach(function(n) {
-			var d/*:any*/ = {name:n.Name};
-			if(n.Comment) d.comment = n.Comment;
-			if(n.Sheet != null) d.localSheetId = ""+n.Sheet;
-			if(n.Hidden) d.hidden = "1";
-			if(!n.Ref) return;
-			o[o.length] = writextag('definedName', String(n.Ref).replace(/</g, "&lt;").replace(/>/g, "&gt;"), d);
-		});
-		o[o.length] = "</definedNames>";
-	}
-
-	/* calcPr */
-	/* oleSize */
-	/* customWorkbookViews */
-	/* pivotCaches */
-	/* smartTagPr */
-	/* smartTagTypes */
-	/* webPublishing */
-	/* fileRecoveryPr */
-	/* webPublishObjects */
-	/* extLst */
-
 	if(o.length>2){ o[o.length] = '</workbook>'; o[1]=o[1].replace("/>",">"); }
 	return o.join("");
 }
